@@ -16,11 +16,9 @@ import aifunctions
 import helperfunctions
 import mediainfo
 import guess
-import tormag
 import progconv
 import others
 import tictactoe
-from chatGPT import *
 
 
 # env
@@ -658,13 +656,7 @@ def transcript(message,oldmessage):
     app.delete_messages(message.chat.id,message_ids=[oldmessage.id])
     os.remove(file)
     
-
-# chat gpt
-def chatai(qes,message,msg):
-    ans = chatGPTget(qes)
-    app.edit_message_text(message.chat.id, msg.id, ans, disable_web_page_preview=True)
-
-
+    
 # text to speech 
 def speak(message,oldmessage):
     file = app.download_media(message)
@@ -868,7 +860,7 @@ def start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_m
 @app.on_message(filters.command(['help']))
 def help(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     oldm = app.send_message(message.chat.id,
-                     "**/start - To Check Availabe Conversions\n/help - This Message\n/imagegen - Text to Image\n/videogen - Text to Video\n/cancel - To Cancel\n/rename - To Rename File\n/read - To Read File\n/make - To Make File\n/chatGPT - Interact with chatGPT\n/guess - To Guess\n/tictactoe - To Play Tic Tac Toe\n/source - Github Source Code\n**", reply_to_message_id=message.id)
+                     "**/start - To Check Availabe Conversions\n/help - This Message\n/imagegen - Text to Image\n/videogen - Text to Video\n/cancel - To Cancel\n/rename - To Rename File\n/read - To Read File\n/make - To Make File\n/guess - To Guess\n/tictactoe - To Play Tic Tac Toe\n/source - Github Source Code\n**", reply_to_message_id=message.id)
     dm = threading.Thread(target=lambda:dltmsg(message,oldm),daemon=True)
     dm.start() 
 
@@ -977,19 +969,6 @@ def makecmd(client: pyrogram.client.Client, message: pyrogram.types.messages_and
     mf.start()
 
 
-# chatGpt
-@app.on_message(filters.command(["chatgpt"]))
-def send_gpt(client: pyrogram.client.Client,message: pyrogram.types.messages_and_media.message.Message,):
-    try: qes = message.text.split("/chatGPT ")[1]
-    except:
-        message.reply_text("__use like this : __ **/chatGPT question**", reply_to_message_id=message.id)
-        return
-
-    msg = message.reply_text("__answering__", reply_to_message_id=message.id)
-    cgpt = threading.Thread(target=lambda:chatai(qes,message,msg),daemon=True)
-    cgpt.start()
-
-
 # Tic Tac Toe Game
 @app.on_message(filters.command("tictactoe"))
 def startTTT(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
@@ -1085,13 +1064,6 @@ def documnet(client: pyrogram.client.Client, message: pyrogram.types.messages_an
                          f'__Detected Extension:__ **{dext}** 🗄\n__Do you want to Extract ?__\n\n{message.from_user.mention} __choose or click /cancel to Cancel or use /rename  to  Rename__',
                          reply_markup=ARCboard, reply_to_message_id=message.id)
 
-    # TOR
-    elif message.document.file_name.upper().endswith("TORRENT"):
-        os.remove(f'{message.from_user.id}.json')
-        oldm = app.send_message(message.chat.id,'__Getting Magnet Link__', reply_to_message_id=message.id)
-        ml = threading.Thread(target=lambda:getmag(message,oldm),daemon=True)
-        ml.start()
-        return
     
     # SUB
     elif message.document.file_name.upper().endswith(SUB):
